@@ -17,7 +17,6 @@ class GUI:
         self.watermark_filepath = None
         self.watermark = None
 
-
         self.root = Tk()
         self.root.title("Watermark Generator")
 
@@ -69,7 +68,7 @@ class GUI:
         self.watermark_options_frame = Frame(self.buttons_frame, padding=(0, 0, 0, 0), borderwidth=3, relief="raised", border=2)
 
         # ______WATERMARK OPTIONS _____
-        self.watermark_options_label = Label(self.watermark_options_frame, text="Place Watermark", font=("Arial 20 bold"))
+        self.watermark_options_label = Label(self.watermark_options_frame, text="Watermark Options: ", font=("Arial 20 bold"))
         self.watermark_options_label.grid(row=2, column=0)
 
         # WATERMARK SIZE
@@ -111,7 +110,7 @@ class GUI:
         self.load_btn.grid(row=2, column=0, padx=10)
 
         # IMAGE SAVE AREA
-        self.load_btn = Button(self.picture_frame, command=logic.save_file, text="Save File")
+        self.load_btn = Button(self.picture_frame, command=self.save_file, text="Save File")
         self.load_btn.grid(row=2, column=1, padx=10)
 
         self.watermark_clear = Button(self.picture_frame, command=lambda: self.open_file(refresh=True),
@@ -126,25 +125,23 @@ class GUI:
 
     def open_file(self, refresh=False):
         # Call logic.open_file to get thumbnail and image_filepath
-        filepath = None
+
         if not refresh:
-
-            filepath = filedialog.askopenfilename()
-            try:
-                self.thumbnail, self.image_filepath = logic.open_file(filepath)
-            except:
-                return
-            # Send to display
-            self.display_image()
-
-    def open_watermark(self):
-
-        filepath = filedialog.askopenfilename()
+            self.image_filepath = filedialog.askopenfilename()
         try:
-            self.watermark_thumbnail, self.watermark_filepath, self.watermark = logic.open_watermark(filepath)
+            self.thumbnail, self.image_filepath = logic.open_file(self.image_filepath)
         except:
             return
+        # Send to display
+        self.display_image()
 
+    def open_watermark(self):
+        if not self.watermark_filepath:
+            self.watermark_filepath = filedialog.askopenfilename()
+        try:
+            self.watermark_thumbnail, self.watermark_filepath, self.watermark = logic.open_watermark(self.watermark_filepath)
+        except:
+            return
         self.watermark_display.configure(anchor=CENTER, image=self.watermark_thumbnail)
         self.watermark_path.configure(text=self.watermark_filepath)
         self.watermark_options_frame.grid(row=5, column=0)
@@ -161,10 +158,13 @@ class GUI:
         if not text:
             messagebox.showinfo("Error", "Cannot Be blank")
             return
-        self.image, self.image_filepath = logic.create_text_watermark(text)
-        self.thumbnail, self.image_filepath = logic.display_image()
-        self.open_watermark()
-        self.display_image()
+        try:
+            self.image, self.image_filepath, self.watermark_filepath = logic.create_text_watermark(text)
+            self.thumbnail, self.image_filepath = logic.display_image()
+            self.open_watermark()
+            self.display_image()
+        except TypeError as e:
+            messagebox.showerror("Error", "Error.\nPlease 'Open File' first")
 
 
     def display_image(self):
@@ -173,10 +173,17 @@ class GUI:
         self.img_display.configure(anchor=NW, image=self.thumbnail)
         self.img_filepath.configure(text=self.image_filepath)
 
+    def save_file(self):
+        try:
+            logic.save_file()
+            messagebox.showinfo("Save Success", "Saved to '/processed' directory")
+        except Exception as e:
+            messagebox.showinfo("Save failed", f"Save Failed. \n\nError code: \n {e.args}")
+
     def batch_process(self):
         try:
             logic.batch_process()
-            messagebox.showinfo("Batch Process", "Success")
+            messagebox.showinfo("Batch Process", "Batch saved to '/processed' directory")
         except Exception as e:
             messagebox.showinfo("Batch Process", f"Failed: \n\n {e.args}")
 

@@ -54,7 +54,7 @@ class Logic:
         self.watermark_filepath = os.path.join(self.directory, 'watermarks/text_watermark.png')
         txt.save(self.watermark_filepath, "PNG")
 
-        return self.image, self.image_filepath
+        return self.image, self.image_filepath, self.watermark_filepath
 
     def watermark_image(self, locations, size_selected):
         if locations:
@@ -118,10 +118,12 @@ class Logic:
 
 
     def save_file(self):
-        current_dir = "/".join(self.image_filepath.split("/")[:-1])
-        filename = self.image_filepath.split('/')[-1]
-        save_path = os.path.join(current_dir, 'processed')
-        if not os.path.exists(save_path):
-            os.mkdir(save_path)
-
-        self.image.save(os.path.join(save_path, filename), format='JPEG')
+        try:
+            filename = self.image_filepath.split('/')[-1]
+            save_path = os.path.join(self.directory, 'processed')
+            if not os.path.exists(save_path):
+                os.mkdir(save_path)
+            self.image.save(os.path.join(save_path, filename), format='JPEG')
+            return True
+        except Exception as e:
+            raise Exception(f"Not able to save\n\n {e.args}")
