@@ -34,7 +34,6 @@ class GUI:
 
         self.picture_frame = Frame(self.root_frame, padding=10, width=900, height=800)
         self.picture_frame.grid(row=1, column=0, )
-        # picture_frame.grid_columnconfigure(0, minsize=800)
         self.picture_frame.grid_rowconfigure(0, minsize=800)
 
         self.buttons_frame = Frame(self.root_frame, padding=10, width=300, border=1, relief="raised", borderwidth=1)
