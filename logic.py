@@ -90,7 +90,7 @@ class Logic:
             for x in self.watermark_locations:
                 draw.bitmap(xy=location_dict[location_keys[x]], bitmap=watermark)
 
-            return self.image, self.image_filepath
+            return self.image
 
     def display_image(self):
         thumbnail = self.image.copy()

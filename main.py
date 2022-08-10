@@ -27,6 +27,7 @@ class GUI:
         self.root_frame.grid_columnconfigure(1, minsize=400)
         self.root_frame.grid_rowconfigure(1, minsize=800)
 
+
         # PRIMARY DISPLAY FRAME ELEMENTS
         self.logo = Label(self.root_frame, text="Watermark Generator", font="Monaco 50", )
         self.logo.grid(row=0, column=0, columnspan=2, pady=(10, 0))
@@ -56,13 +57,13 @@ class GUI:
 
         # WATERMARK OPTIONS AREA
 
-        self.watermark_open = Button(self.buttons_frame, command=self.open_watermark, text="Watermark from file", width=15,)
+        self.watermark_open = Button(self.buttons_frame, state="disabled", command=self.open_watermark, text="Watermark from file", width=15,)
         self.watermark_open.grid(row=1, column=0, pady=(0,20))
 
 
         self.watermark_text_entry = Entry(self.buttons_frame, width=18)
         self.watermark_text_entry.grid(row=2, column=0, pady=(20, 0), )
-        self.watermark_text_btn = Button(self.buttons_frame, text="Watermark from text", command=self.watermark_from_text, width=15)
+        self.watermark_text_btn = Button(self.buttons_frame, state="disabled", text="Watermark from text", command=self.watermark_from_text, width=15)
         self.watermark_text_btn.grid(row=3, column=0, pady=(0, 20))
 
         self.watermark_options_frame = Frame(self.buttons_frame, padding=(0, 0, 0, 0), borderwidth=3, relief="raised", border=2)
@@ -110,11 +111,12 @@ class GUI:
         self.load_btn.grid(row=2, column=0, padx=10)
 
         # IMAGE SAVE AREA
-        self.load_btn = Button(self.picture_frame, command=self.save_file, text="Save File")
-        self.load_btn.grid(row=2, column=1, padx=10)
+        self.save_btn = Button(self.picture_frame, state="disabled", command=self.save_file, text="Save File")
+        self.save_btn.grid(row=2, column=1, padx=10)
 
-        self.watermark_clear = Button(self.picture_frame, command=lambda: self.open_file(refresh=True),
+        self.watermark_clear = Button(self.picture_frame, state="disabled", command=lambda: self.open_file(refresh=True),
                                       text="Clear Watermark",)
+
         self.watermark_clear.grid(row=2, column=2, padx=10)
 
         # IMAGE FRAME ELEMENTS
@@ -123,9 +125,18 @@ class GUI:
         self.img_filepath = Label(self.picture_frame)
         self.img_filepath.grid(row=1, column=0, columnspan=3)
 
-    def open_file(self, refresh=False):
-        # Call logic.open_file to get thumbnail and image_filepath
+        messagebox.showinfo("How to use", "1. Use Open File to load an image\n\n"
+                                          "2. Choose a file watermark or generate one from text\n\n"
+                                          "3. Select size and location(s) for watermark\n\n"
+                                          "4. Save File or bath process to watermark all images in current directory")
 
+
+
+
+
+    def open_file(self, refresh=False):
+
+        # Call logic.open_file to get thumbnail and image_filepath
         if not refresh:
             self.image_filepath = filedialog.askopenfilename()
         try:
@@ -134,6 +145,10 @@ class GUI:
             return
         # Send to display
         self.display_image()
+        self.save_btn["state"] = "!disabled"
+        self.watermark_clear["state"] = "!disabled"
+        self.watermark_open['state'] = "!disabled"
+        self.watermark_text_btn['state'] = "!disabled"
 
     def open_watermark(self):
         if not self.watermark_filepath:
@@ -141,6 +156,7 @@ class GUI:
         try:
             self.watermark_thumbnail, self.watermark_filepath, self.watermark = logic.open_watermark(self.watermark_filepath)
         except:
+            messagebox.showinfo("Error", "Load image file first")
             return
         self.watermark_display.configure(anchor=CENTER, image=self.watermark_thumbnail)
         self.watermark_path.configure(text=self.watermark_filepath)
@@ -149,7 +165,7 @@ class GUI:
     def watermark_image(self):
         locations = list(self.watermark_location_listbox.curselection())
         size = self.watermark_size.get()
-        self.image, self.image_filepath = logic.watermark_image(locations, size)
+        self.image = logic.watermark_image(locations, size)
         self.thumbnail, self.image_filepath = logic.display_image()
         self.display_image()
 
@@ -186,6 +202,13 @@ class GUI:
             messagebox.showinfo("Batch Process", "Batch saved to '/processed' directory")
         except Exception as e:
             messagebox.showinfo("Batch Process", f"Failed: \n\n {e.args}")
+
+    def disable_toggle(self, element):
+        if element['state'] == "disabled":
+            element['state'] =="!disabled"
+        elif element['state'] == "!disabled":
+            element['state'] == "disabled"
+
 
 gui = GUI()
 gui.root.mainloop()
